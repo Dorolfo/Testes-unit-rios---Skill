@@ -1,0 +1,180 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate-skill:
+    name: Validate Skill File
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check skill file exists
+        run: |
+          if [ ! -f "unit-testing.skill" ]; then
+            echo "❌ unit-testing.skill file not found!"
+            exit 1
+          fi
+          echo "✅ Skill file found"
+
+      - name: Validate skill structure
+        run: |
+          # Check if it's a valid ZIP file
+          if ! unzip -t unit-testing.skill > /dev/null 2>&1; then
+            echo "❌ Skill file is not a valid ZIP archive!"
+            exit 1
+          fi
+          echo "✅ Skill file is a valid ZIP"
+
+      - name: Extract and validate content
+        run: |
+          mkdir -p /tmp/skill-test
+          unzip -q unit-testing.skill -d /tmp/skill-test
+
+          # Check for required files
+          if [ ! -f "/tmp/skill-test/unit-testing/SKILL.md" ]; then
+            echo "❌ SKILL.md not found in skill package!"
+            exit 1
+          fi
+
+          echo "✅ SKILL.md found"
+
+          # Validate SKILL.md has frontmatter
+          if ! head -1 /tmp/skill-test/unit-testing/SKILL.md | grep -q "^---$"; then
+            echo "❌ SKILL.md missing YAML frontmatter!"
+            exit 1
+          fi
+
+          echo "✅ SKILL.md has valid frontmatter"
+
+  test-python-examples:
+    name: Test Python Examples
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          if [ -f "examples/python/requirements.txt" ]; then
+            python -m pip install --upgrade pip
+            pip install -r examples/python/requirements.txt
+            echo "✅ Python dependencies installed"
+          else
+            echo "⚠️ No requirements.txt found, skipping"
+          fi
+
+      - name: Run Python tests
+        run: |
+          if [ -d "examples/python" ] && [ -n "$(find examples/python -name 'test_*.py' -o -name '*_test.py')" ]; then
+            cd examples/python
+            pytest -v
+            echo "✅ Python tests passed"
+          else
+            echo "⚠️ No Python tests found, skipping"
+          fi
+
+  test-javascript-examples:
+    name: Test JavaScript Examples
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['18', '20', '22']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: |
+          if [ -f "examples/javascript/package.json" ]; then
+            cd examples/javascript
+            npm ci
+            echo "✅ JavaScript dependencies installed"
+          else
+            echo "⚠️ No package.json found, skipping"
+          fi
+
+      - name: Run JavaScript tests
+        run: |
+          if [ -f "examples/javascript/package.json" ]; then
+            cd examples/javascript
+            npm test
+            echo "✅ JavaScript tests passed"
+          else
+            echo "⚠️ No JavaScript tests found, skipping"
+          fi
+
+  lint-markdown:
+    name: Lint Markdown
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint markdown files
+        run: |
+          markdownlint '**/*.md' --ignore node_modules --ignore .github || true
+          echo "✅ Markdown linting complete"
+
+  check-links:
+    name: Check Dead Links
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check links in README
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/markdown-link-check-config.json'
+        continue-on-error: true
+
+  build-status:
+    name: Build Status
+    runs-on: ubuntu-latest
+    needs: [validate-skill, test-python-examples, test-javascript-examples, lint-markdown]
+    if: always()
+
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.validate-skill.result }}" == "success" ] && \
+             [ "${{ needs.test-python-examples.result }}" == "success" ] && \
+             [ "${{ needs.test-javascript-examples.result }}" == "success" ]; then
+            echo "✅ All checks passed!"
+          else
+            echo "❌ Some checks failed"
+            exit 1
+          fi

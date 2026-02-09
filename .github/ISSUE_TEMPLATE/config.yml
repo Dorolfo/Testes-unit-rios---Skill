@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/Dorolfo/Testes-unit-rios---Skill/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📚 Documentation
+    url: https://github.com/Dorolfo/Testes-unit-rios---Skill/blob/main/README.md
+    about: Read the documentation and guides
+  - name: 🔌 MCP Integrations
+    url: https://github.com/Dorolfo/Testes-unit-rios---Skill/blob/main/docs/integrations.md
+    about: Learn about MCP server integrations

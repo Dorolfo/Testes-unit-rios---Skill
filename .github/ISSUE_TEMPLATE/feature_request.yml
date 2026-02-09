@@ -1,0 +1,106 @@
+name: 💡 Feature Request
+description: Suggest a new testing pattern or improvement
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a new feature! Please provide as much detail as possible.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Describe it.
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like to see
+      placeholder: |
+        I think the skill should include...
+
+        Example:
+        ```python
+        # Your proposed pattern
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative solutions?
+      placeholder: I also thought about...
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What type of feature is this?
+      options:
+        - New testing pattern
+        - Framework support
+        - Documentation improvement
+        - Example addition
+        - Integration (MCP)
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Language/Framework
+      description: Which language or framework would this apply to?
+      multiple: true
+      options:
+        - Python (pytest)
+        - Python (unittest)
+        - JavaScript (Jest)
+        - JavaScript (Vitest)
+        - TypeScript
+        - All languages
+        - Other
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: Use Cases
+      description: Describe when and why someone would use this feature
+      placeholder: |
+        This would be useful when:
+        1. Testing API integrations
+        2. Mocking complex dependencies
+        3. ...
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Code Examples
+      description: Provide code examples showing the proposed feature
+      placeholder: |
+        ```python
+        # Example of how it would work
+        @pytest.fixture
+        def example():
+            ...
+        ```
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues/features
+          required: true
+        - label: This feature would benefit the broader community
+          required: false
+        - label: I am willing to contribute to implementing this
+          required: false

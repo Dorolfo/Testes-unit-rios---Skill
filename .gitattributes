@@ -1,0 +1,38 @@
+# Git attributes for better diffs and language detection
+
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Explicitly declare text files
+*.md text
+*.txt text
+*.json text
+*.yml text
+*.yaml text
+*.sh text eol=lf
+*.py text
+*.js text
+*.ts text
+*.sql text
+
+# Denote binary files
+*.skill binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# GitHub linguist overrides
+*.md linguist-documentation
+*.sql linguist-detectable
+examples/* linguist-vendored=false
+docs/* linguist-documentation
+
+# Export ignore - exclude from archives
+.gitignore export-ignore
+.gitattributes export-ignore
+.github/ export-ignore
+build.sh export-ignore
+PROJECT_SUMMARY.md export-ignore
